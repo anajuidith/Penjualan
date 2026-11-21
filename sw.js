@@ -6,7 +6,6 @@ const CORE_ASSETS = [
   './manifest.json'
 ];
 
-// Simpan aset inti aplikasi saat service worker terpasang
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).catch((err) => {
@@ -16,7 +15,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Bersihkan cache versi lama saat versi baru aktif
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -28,7 +26,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Strategi cache-first dengan pembaruan latar belakang & fallback aman saat offline
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
