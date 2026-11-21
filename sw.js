@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'penjualan-catatan-titipan-v2';
 const CORE_ASSETS = [
   './',
