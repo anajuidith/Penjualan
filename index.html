@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catatan Titipan Kue - Ma lilis & Mince</title>
+    <title>Penjualan - Catatan Titipan Kue</title>
+    <!-- PWA Manifest & Theme Meta Tags -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="application-name" content="Penjualan">
+    <meta name="theme-color" content="#ed741b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Penjualan">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter & Plus Jakarta Sans -->
@@ -1344,6 +1352,21 @@
             loadState();
             renderApp();
         });
+
+        // Registrasi Service Worker (sw.js) untuk dukungan offline dengan fallback aman
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                try {
+                    const isHttpContext = window.location.protocol === 'https:' || window.location.protocol === 'http:';
+                    if (!isHttpContext) return;
+                    navigator.serviceWorker.register('./sw.js').catch((err) => {
+                        console.warn('Service worker tidak aktif pada konteks ini:', err);
+                    });
+                } catch (e) {
+                    console.warn('Lewati registrasi service worker:', e);
+                }
+            });
+        }
     </script>
 </body>
 </html>
