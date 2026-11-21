@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Titipan Kue - Ma lilis & Mince</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fef7ee',
+                            100: '#fdedd6',
+                            200: '#fad7ac',
+                            300: '#f6ba77',
+                            400: '#f19340',
+                            500: '#ed741b',
+                            600: '#de5911',
+                            700: '#b84210',
+                            800: '#933515',
+                            900: '#772e14',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Sembunyikan panah default input number */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- Top Header & Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <!-- Brand Bar -->
+            <div class="flex items-center justify-between py-3.5 gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center shadow-xs">
+                        <i data-lucide="store" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0">
+                <!-- Indikator Otomatis, Buku Besar & Tombol Kelola Produk -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Tersimpan otomatis
+                    </span>
+                    <button type="button" id="btnOpenLedger" onclick="toggleView('ledger')" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-800 border border-amber-200/80 font-semibold text-sm transition-colors touch-manipulation">
+                        <i data-lucide="book-open" class="w-4 h-4 text-amber-600"></i>
+                        <span>Buku Besar</span>
+                        <span id="ledgerBadgeCount" class="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 hidden">0</span>
+                    </button>
+                    <button type="button" onclick="openProductModal()" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-sm transition-colors touch-manipulation">
+                        <i data-lucide="settings-2" class="w-4 h-4 text-brand-600"></i>
+                        <span class="hidden sm:inline">Kelola Produk</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area: Halaman Input Stok & Penjualan -->
+    <main id="mainTrackerView" class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 space-y-4">
+
+        <!-- Two Reseller Tabs (Dipindahkan ke area utama agar lebih lega) -->
+        <section id="resellerTabsWrapper" class="bg-white p-2 rounded-2xl border border-slate-200/90 shadow-xs grid grid-cols-2 gap-2.5">
+            <button type="button" id="tab-malilis" onclick="switchTab('malilis')" class="relative flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 py-3.5 px-4 rounded-xl font-display font-bold text-sm sm:text-base transition-all duration-200 border-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+                    <span>Ma lilis</span>
+                </div>
+                <span id="badge-malilis" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 hidden">Rp 0</span>
+            </button>
+
+            <button type="button" id="tab-mince" onclick="switchTab('mince')" class="relative flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 py-3.5 px-4 rounded-xl font-display font-bold text-sm sm:text-base transition-all duration-200 border-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                    <span>Mince</span>
+                </div>
+                <span id="badge-mince" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 hidden">Rp 0</span>
+            </button>
+        </section>
+
+        <!-- Banner Informasi Sederhana & Tombol Reset -->
+        <section class="bg-white rounded-2xl px-4 py-3.5 sm:px-5 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h2 class="font-display font-bold text-sm sm:text-base text-slate-900">Stok & Penjualan</h2>
+                    <p class="text-xs text-slate-500" id="activeResellerSubtitle">Penjual: Ma lilis</p>
+                </div>
+            </div>
+
+            <button type="button" onclick="confirmResetQuantities()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 border border-rose-200/80 transition-colors touch-manipulation">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                <span>Reset Hari Baru</span>
+            </button>
+        </section>
+
+        <!-- Desktop Table Header -->
+        <div class="hidden md:grid md:grid-cols-12 gap-3 px-5 py-3 bg-slate-200/70 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600">
+            <div class="col-span-4">Produk & Harga</div>
+            <div class="col-span-2 text-center">Dibawa (Stok)</div>
+            <div class="col-span-2 text-center">Sisa (Kembali)</div>
+            <div class="col-span-2 text-center">Terjual</div>
+            <div class="col-span-2 text-right">Subtotal</div>
+        </div>
+
+        <!-- Product List Container -->
+        <div id="productListContainer" class="space-y-3">
+            <!-- Diisi otomatis oleh JavaScript -->
+        </div>
+
+        <!-- Ringkasan Setoran Hari Ini -->
+        <section class="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-lg space-y-5 mt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-brand-400">Ringkasan Setoran Hari Ini</span>
+                    <h3 id="summaryResellerHeading" class="font-display font-bold text-xl text-white mt-0.5">Total Ma lilis</h3>
+                </div>
+                <span class="inline-flex items-center gap-1.5 text-xs text-slate-400">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    Data tersimpan otomatis di perangkat
+                </span>
+            </div>
+
+            <!-- 4 Metrik Utama -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-slate-800/80 rounded-xl p-3.5 border border-slate-700/70">
+                    <span class="text-xs text-slate-400 block">Total Dibawa</span>
+                    <span id="totalBroughtCount" class="font-display font-bold text-xl sm:text-2xl text-white mt-1 block">0</span>
+                    <span class="text-[11px] text-slate-400">pcs</span>
+                </div>
+
+                <div class="bg-slate-800/80 rounded-xl p-3.5 border border-slate-700/70">
+                    <span class="text-xs text-slate-400 block">Total Sisa</span>
+                    <span id="totalLeftoverCount" class="font-display font-bold text-xl sm:text-2xl text-amber-400 mt-1 block">0</span>
+                    <span class="text-[11px] text-slate-400">pcs</span>
+                </div>
+
+                <div class="bg-slate-800/80 rounded-xl p-3.5 border border-slate-700/70">
+                    <span class="text-xs text-slate-400 block">Total Terjual</span>
+                    <span id="totalSoldCount" class="font-display font-bold text-xl sm:text-2xl text-emerald-400 mt-1 block">0</span>
+                    <span class="text-[11px] text-slate-400">pcs</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-brand-600 to-brand-700 rounded-xl p-3.5 border border-brand-500/50 col-span-2 sm:col-span-1">
+                    <span class="text-xs text-brand-100 block">Total Setoran</span>
+                    <span id="grandTotalRevenue" class="font-display font-extrabold text-xl sm:text-2xl text-white mt-1 block">Rp 0</span>
+                    <span class="text-[11px] text-brand-200">rupiah</span>
+                </div>
+            </div>
+
+            <!-- Tombol Salin Laporan WA -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-1">
+                <button type="button" onclick="copySummaryToClipboard()" class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-display font-bold text-sm sm:text-base shadow-sm transition-colors touch-manipulation">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span>Salin Laporan WA</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Main Content Area: Halaman Khusus Buku Besar Akuntansi -->
+    <main id="ledgerView" class="hidden flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 space-y-5">
+
+        <!-- Header Navigasi Buku Besar -->
+        <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="toggleView('tracker')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm transition-colors touch-manipulation">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Kembali</span>
+                </button>
+                <div>
+                    <h2 class="font-display font-bold text-lg sm:text-xl text-slate-900">Buku Besar Penjualan</h2>
+                    <p class="text-xs text-slate-500">Arsip otomatis setiap kali menekan Reset Hari Baru</p>
+                </div>
+            </div>
+
+            <!-- Filter Penjual di Buku Besar -->
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
+                <button type="button" id="filter-all" onclick="setLedgerFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs">Semua</button>
+                <button type="button" id="filter-malilis" onclick="setLedgerFilter('malilis')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800">Ma lilis</button>
+                <button type="button" id="filter-mince" onclick="setLedgerFilter('mince')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800">Mince</button>
+            </div>
+        </section>
+
+        <!-- Ringkasan Saldo Akuntansi (Bulan Terpilih) -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Kue Terjual (Bulan Ini)</span>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                    <span id="ledgerMonthSold" class="font-display font-extrabold text-2xl text-slate-900">0</span>
+                    <span class="text-xs text-slate-500 font-medium">pcs</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jumlah Tutup Buku</span>
+                <div class="mt-1 flex items-baseline gap-1.5">
+                    <span id="ledgerMonthEntries" class="font-display font-extrabold text-2xl text-brand-600">0</span>
+                    <span class="text-xs text-slate-500 font-medium">catatan</span>
+                </div>
+            </div>
+            <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-brand-400 uppercase tracking-wider">Total Pemasukan (Bulan Ini)</span>
+                <div class="mt-1">
+                    <span id="ledgerMonthRevenue" class="font-display font-extrabold text-2xl text-emerald-400">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid Kalender & Jurnal Buku Besar -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            
+            <!-- Kolom Kalender Akuntansi -->
+            <section class="lg:col-span-5 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs space-y-4">
+                <div class="flex items-center justify-between">
+                    <button type="button" onclick="changeLedgerMonth(-1)" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors" aria-label="Bulan sebelumnya">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <h3 id="calendarMonthLabel" class="font-display font-bold text-sm sm:text-base text-slate-900">November 2026</h3>
+                    <button type="button" onclick="changeLedgerMonth(1)" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors" aria-label="Bulan berikutnya">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Header Hari -->
+                <div class="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 uppercase">
+                    <div>Min</div>
+                    <div>Sen</div>
+                    <div>Sel</div>
+                    <div>Rab</div>
+                    <div>Kam</div>
+                    <div>Jum</div>
+                    <div>Sab</div>
+                </div>
+
+                <!-- Grid Tanggal -->
+                <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5">
+                    <!-- Diisi oleh JS -->
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-3 text-slate-500">
+                        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Ada Setoran</span>
+                    </div>
+                    <button type="button" id="btnClearDateFilter" onclick="selectLedgerDate(null)" class="hidden text-brand-600 font-semibold hover:underline">
+                        Tampilkan Semua Tanggal
+                    </button>
+                </div>
+            </section>
+
+            <!-- Kolom Tabel Jurnal / Catatan Buku Besar -->
+            <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+                <div class="px-4 py-3.5 sm:px-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+                    <div>
+                        <h3 id="journalHeading" class="font-display font-bold text-sm sm:text-base text-slate-900">Jurnal Harian (Semua Tanggal)</h3>
+                        <p class="text-[11px] text-slate-500">Klik baris catatan untuk melihat rincian kue</p>
+                    </div>
+                </div>
+
+                <div id="ledgerEntriesContainer" class="divide-y divide-slate-100 max-h-[34rem] overflow-y-auto">
+                    <!-- Diisi oleh JS -->
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal Detail Catatan Buku Besar -->
+    <div id="ledgerDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                <div>
+                    <span id="detailModalBadge" class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-brand-100 text-brand-800">Ma lilis</span>
+                    <h3 id="detailModalDate" class="font-display font-bold text-base text-slate-900 mt-1">Detail Setoran</h3>
+                </div>
+                <button type="button" onclick="closeLedgerDetailModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="detailModalBody" class="p-5 overflow-y-auto space-y-2.5 flex-1 text-sm">
+                <!-- Rincian item -->
+            </div>
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+                <button type="button" id="btnDeleteLedgerEntry" class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-2 rounded-xl hover:bg-rose-50 transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Catatan
+                </button>
+                <button type="button" onclick="closeLedgerDetailModal()" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-colors">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kelola Produk -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i data-lucide="package-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-bold text-base sm:text-lg text-slate-900">Kelola Produk</h3>
+                        <p class="text-xs text-slate-500">Tambah, ubah harga, atau hapus kue</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeProductModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Form Tambah Produk Baru -->
+            <form onsubmit="handleAddProduct(event)" class="p-5 bg-slate-50 border-b border-slate-200 space-y-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Tambah Produk Baru</span>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                    <div class="sm:col-span-6">
+                        <input type="text" id="newProductName" required placeholder="Nama kue (cth: Lemper)"
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="sm:col-span-4">
+                        <input type="number" id="newProductPrice" required min="100" step="50" placeholder="Harga (Rp)"
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="w-full h-full py-2.5 px-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm flex items-center justify-center gap-1 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span class="sm:hidden">Tambah</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Daftar Produk yang Tersedia -->
+            <div id="manageProductList" class="p-5 overflow-y-auto space-y-2.5 flex-1">
+                <!-- Diisi otomatis oleh JS -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+                <button type="button" onclick="confirmRestoreDefaults()" class="text-xs font-semibold text-slate-500 hover:text-brand-600 transition-colors">
+                    Reset ke 8 Produk Awal
+                </button>
+                <button type="button" onclick="closeProductModal()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-colors">
+                    Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Dialog -->
+    <div id="confirmDialog" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h4 id="confirmTitle" class="font-display font-bold text-base text-slate-900">Konfirmasi</h4>
+                    <p id="confirmMessage" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">Apakah Anda yakin?</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeConfirmDialog()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors">
+                    Batal
+                </button>
+                <button type="button" id="confirmActionBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm transition-colors">
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200">
+        <div class="bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-xs sm:text-sm font-medium border border-slate-700">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span id="toastMessage">Tersimpan</span>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. KONFIGURASI AWAL & PENYIMPANAN OTOMATIS (LOCALSTORAGE)
+        // =========================================================================
+        const STORAGE_KEY = 'catatan_titipan_kue_clean_v1';
+
+        const DEFAULT_PRODUCTS = [
+            { id: 'p_brownis', name: 'Brownis', price: 1500 },
+            { id: 'p_donat', name: 'Donat', price: 1500 },
+            { id: 'p_nagasari', name: 'Nagasari', price: 1000 },
+            { id: 'p_bolukukus', name: 'Bolu Kukus', price: 1000 },
+            { id: 'p_lapis', name: 'Lapis', price: 1000 },
+            { id: 'p_nonamanis', name: 'Nona Manis', price: 1000 },
+            { id: 'p_risol', name: 'Risol', price: 1000 },
+            { id: 'p_peyek', name: 'Peyek', price: 2500 }
+        ];
+
+        const RESELLERS = {
+            malilis: { id: 'malilis', name: 'Ma lilis' },
+            mince: { id: 'mince', name: 'Mince' }
+        };
+
+        let appState = {
+            activeTab: 'malilis',
+            products: [],
+            records: {
+                malilis: { items: {} },
+                mince: { items: {} }
+            },
+            ledger: []
+        };
+
+        let uiState = {
+            currentView: 'tracker', // 'tracker' | 'ledger'
+            ledgerFilter: 'all',    // 'all' | 'malilis' | 'mince'
+            selectedDate: null,     // 'YYYY-MM-DD' | null
+            calendarYear: new Date().getFullYear(),
+            calendarMonth: new Date().getMonth()
+        };
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState.activeTab = parsed.activeTab === 'mince' ? 'mince' : 'malilis';
+                    appState.products = Array.isArray(parsed.products) && parsed.products.length > 0
+                        ? parsed.products
+                        : JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+                    appState.records = {
+                        malilis: { items: parsed.records?.malilis?.items || {} },
+                        mince: { items: parsed.records?.mince?.items || {} }
+                    };
+                    appState.ledger = Array.isArray(parsed.ledger) ? parsed.ledger : [];
+                } else {
+                    appState.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+                }
+            } catch (e) {
+                console.error('Gagal memuat data dari localStorage:', e);
+                appState.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.error('Gagal menyimpan data ke localStorage:', e);
+            }
+        }
+
+        // =========================================================================
+        // 2. FORMATTER & HELPER
+        // =========================================================================
+        function formatRupiah(amount) {
+            return 'Rp ' + (Number(amount) || 0).toLocaleString('id-ID');
+        }
+
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // =========================================================================
+        // 3. NAVIGASI TAB & RENDER TAMPILAN UTAMA
+        // =========================================================================
+        function switchTab(resellerId) {
+            appState.activeTab = resellerId;
+            saveState();
+            renderApp();
+        }
+
+        function renderApp() {
+            const activeId = appState.activeTab;
+            const reseller = RESELLERS[activeId];
+
+            const tabMalilis = document.getElementById('tab-malilis');
+            const tabMince = document.getElementById('tab-mince');
+
+            if (activeId === 'malilis') {
+                tabMalilis.className = 'relative flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 py-3.5 px-4 rounded-xl font-display font-bold text-sm sm:text-base transition-all duration-200 border-2 border-brand-500 bg-brand-50 text-brand-900 shadow-xs';
+                tabMince.className = 'relative flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 py-3.5 px-4 rounded-xl font-display font-bold text-sm sm:text-base transition-all duration-200 border-2 border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200/70';
+            } else {
+                tabMince.className = 'relative flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 py-3.5 px-4 rounded-xl font-display font-bold text-sm sm:text-base transition-all duration-200 border-2 border-sky-500 bg-sky-50 text-sky-900 shadow-xs';
+                tabMalilis.className = 'relative flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 py-3.5 px-4 rounded-xl font-display font-bold text-sm sm:text-base transition-all duration-200 border-2 border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200/70';
+            }
+
+            document.getElementById('activeResellerSubtitle').textContent = `Penjual: ${reseller.name}`;
+            document.getElementById('summaryResellerHeading').textContent = `Total ${reseller.name}`;
+
+            // Update badge jumlah arsip buku besar
+            const ledgerBadge = document.getElementById('ledgerBadgeCount');
+            if (appState.ledger.length > 0) {
+                ledgerBadge.textContent = appState.ledger.length;
+                ledgerBadge.classList.remove('hidden');
+            } else {
+                ledgerBadge.classList.add('hidden');
+            }
+
+            renderProductRows();
+            updateSummaries();
+            if (uiState.currentView === 'ledger') {
+                renderLedgerView();
+            }
+            lucide.createIcons();
+        }
+
+        function renderProductRows() {
+            const container = document.getElementById('productListContainer');
+            const activeId = appState.activeTab;
+            const itemsData = appState.records[activeId].items || {};
+
+            if (appState.products.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 text-center border border-dashed border-slate-300 space-y-3">
+                        <p class="text-slate-500 text-sm">Belum ada produk dalam daftar.</p>
+                        <button type="button" onclick="openProductModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Tambah Produk
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = appState.products.map(product => {
+                const entry = itemsData[product.id] || { brought: 0, leftover: 0 };
+                const brought = parseInt(entry.brought, 10) || 0;
+                const leftover = parseInt(entry.leftover, 10) || 0;
+                const sold = Math.max(0, brought - leftover);
+                const subtotal = sold * product.price;
+                const hasWarning = leftover > brought;
+
+                return `
+                    <div id="row-${product.id}" class="bg-white rounded-2xl p-4 sm:px-5 sm:py-3.5 border ${hasWarning ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200/90'} shadow-xs transition-all">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 md:gap-3 items-center">
+                            
+                            <!-- Nama Produk & Harga -->
+                            <div class="md:col-span-4 flex items-center justify-between md:block">
+                                <div>
+                                    <h4 class="font-display font-bold text-base text-slate-900">${escapeHtml(product.name)}</h4>
+                                    <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md inline-block mt-0.5">
+                                        ${formatRupiah(product.price)} / pcs
+                                    </span>
+                                </div>
+                                <!-- Subtotal Versi Mobile -->
+                                <div class="md:hidden text-right">
+                                    <span class="text-[11px] text-slate-400 block">Subtotal</span>
+                                    <span id="sub-mob-${product.id}" class="font-display font-bold text-base ${subtotal > 0 ? 'text-emerald-600' : 'text-slate-400'}">
+                                        ${formatRupiah(subtotal)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Kontrol Input Dibawa & Sisa -->
+                            <div class="grid grid-cols-2 gap-2.5 md:contents">
+                                <!-- Dibawa -->
+                                <div class="md:col-span-2 bg-slate-50 md:bg-transparent p-2.5 md:p-0 rounded-xl border border-slate-200/70 md:border-0">
+                                    <label class="block md:hidden text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1 text-center">Dibawa</label>
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button type="button" onclick="adjustQty('${product.id}', 'brought', -1)" aria-label="Kurangi dibawa" class="w-9 h-9 rounded-xl bg-white md:bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-200 md:border-0 text-slate-700 font-bold flex items-center justify-center transition-colors touch-manipulation">
+                                            <i data-lucide="minus" class="w-4 h-4"></i>
+                                        </button>
+                                        <input type="number" min="0" inputmode="numeric"
+                                            id="inp-brought-${product.id}"
+                                            value="${brought === 0 ? '' : brought}"
+                                            placeholder="0"
+                                            oninput="setQty('${product.id}', 'brought', this.value)"
+                                            class="w-12 h-9 text-center font-display font-bold text-base text-slate-900 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                        <button type="button" onclick="adjustQty('${product.id}', 'brought', 1)" aria-label="Tambah dibawa" class="w-9 h-9 rounded-xl bg-brand-100 hover:bg-brand-200 active:bg-brand-300 text-brand-800 font-bold flex items-center justify-center transition-colors touch-manipulation">
+                                            <i data-lucide="plus" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Sisa -->
+                                <div class="md:col-span-2 bg-amber-50/50 md:bg-transparent p-2.5 md:p-0 rounded-xl border border-amber-200/60 md:border-0">
+                                    <label class="block md:hidden text-[11px] font-semibold text-amber-700 uppercase tracking-wider mb-1 text-center">Sisa</label>
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button type="button" onclick="adjustQty('${product.id}', 'leftover', -1)" aria-label="Kurangi sisa" class="w-9 h-9 rounded-xl bg-white md:bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-200 md:border-0 text-slate-700 font-bold flex items-center justify-center transition-colors touch-manipulation">
+                                            <i data-lucide="minus" class="w-4 h-4"></i>
+                                        </button>
+                                        <input type="number" min="0" inputmode="numeric"
+                                            id="inp-leftover-${product.id}"
+                                            value="${leftover === 0 ? '' : leftover}"
+                                            placeholder="0"
+                                            oninput="setQty('${product.id}', 'leftover', this.value)"
+                                            class="w-12 h-9 text-center font-display font-bold text-base text-amber-800 bg-white border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                        <button type="button" onclick="adjustQty('${product.id}', 'leftover', 1)" aria-label="Tambah sisa" class="w-9 h-9 rounded-xl bg-amber-100 hover:bg-amber-200 active:bg-amber-300 text-amber-900 font-bold flex items-center justify-center transition-colors touch-manipulation">
+                                            <i data-lucide="plus" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terjual -->
+                            <div class="md:col-span-2 flex items-center justify-between md:justify-center bg-emerald-50/70 md:bg-transparent px-3 py-2 md:p-0 rounded-xl">
+                                <span class="md:hidden text-xs font-semibold text-emerald-800">Terjual (Dibawa - Sisa):</span>
+                                <span id="sold-${product.id}" class="inline-flex items-center justify-center min-w-[3.25rem] px-2.5 py-1 rounded-lg font-display font-extrabold text-sm ${sold > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400'}">
+                                    ${sold} pcs
+                                </span>
+                            </div>
+
+                            <!-- Subtotal Versi Desktop -->
+                            <div class="hidden md:block md:col-span-2 text-right">
+                                <span id="sub-desk-${product.id}" class="font-display font-bold text-base ${subtotal > 0 ? 'text-emerald-600' : 'text-slate-400'}">
+                                    ${formatRupiah(subtotal)}
+                                </span>
+                            </div>
+                        </div>
+
+                        <p id="warn-${product.id}" class="${hasWarning ? 'flex' : 'hidden'} text-xs text-rose-600 font-medium mt-2 items-center gap-1">
+                            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                            Sisa melebihi jumlah yang dibawa! Periksa kembali angka input.
+                        </p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 4. KALKULASI OTOMATIS & UPDATE INPUT
+        // =========================================================================
+        function ensureItemEntry(resellerId, productId) {
+            if (!appState.records[resellerId].items[productId]) {
+                appState.records[resellerId].items[productId] = { brought: 0, leftover: 0 };
+            }
+            return appState.records[resellerId].items[productId];
+        }
+
+        function adjustQty(productId, field, delta) {
+            const activeId = appState.activeTab;
+            const entry = ensureItemEntry(activeId, productId);
+            const currentVal = parseInt(entry[field], 10) || 0;
+            const newVal = Math.max(0, currentVal + delta);
+            entry[field] = newVal;
+
+            saveState();
+
+            const inputEl = document.getElementById(`inp-${field}-${productId}`);
+            if (inputEl) {
+                inputEl.value = newVal === 0 ? '' : newVal;
+            }
+            updateSingleProductRowUI(productId);
+            updateSummaries();
+        }
+
+        function setQty(productId, field, rawValue) {
+            const activeId = appState.activeTab;
+            const entry = ensureItemEntry(activeId, productId);
+            const parsed = Math.max(0, parseInt(rawValue, 10) || 0);
+            entry[field] = parsed;
+
+            saveState();
+            updateSingleProductRowUI(productId);
+            updateSummaries();
+        }
+
+        function updateSingleProductRowUI(productId) {
+            const activeId = appState.activeTab;
+            const product = appState.products.find(p => p.id === productId);
+            if (!product) return;
+
+            const entry = appState.records[activeId].items[productId] || { brought: 0, leftover: 0 };
+            const brought = parseInt(entry.brought, 10) || 0;
+            const leftover = parseInt(entry.leftover, 10) || 0;
+            const sold = Math.max(0, brought - leftover);
+            const subtotal = sold * product.price;
+            const hasWarning = leftover > brought;
+
+            const rowEl = document.getElementById(`row-${productId}`);
+            if (rowEl) {
+                rowEl.className = `bg-white rounded-2xl p-4 sm:px-5 sm:py-3.5 border ${hasWarning ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200/90'} shadow-xs transition-all`;
+            }
+
+            const warnEl = document.getElementById(`warn-${productId}`);
+            if (warnEl) {
+                warnEl.className = `${hasWarning ? 'flex' : 'hidden'} text-xs text-rose-600 font-medium mt-2 items-center gap-1`;
+            }
+
+            const soldEl = document.getElementById(`sold-${productId}`);
+            if (soldEl) {
+                soldEl.textContent = `${sold} pcs`;
+                soldEl.className = `inline-flex items-center justify-center min-w-[3.25rem] px-2.5 py-1 rounded-lg font-display font-extrabold text-sm ${sold > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400'}`;
+            }
+
+            const subMob = document.getElementById(`sub-mob-${productId}`);
+            const subDesk = document.getElementById(`sub-desk-${productId}`);
+            if (subMob) {
+                subMob.textContent = formatRupiah(subtotal);
+                subMob.className = `font-display font-bold text-base ${subtotal > 0 ? 'text-emerald-600' : 'text-slate-400'}`;
+            }
+            if (subDesk) {
+                subDesk.textContent = formatRupiah(subtotal);
+                subDesk.className = `font-display font-bold text-base ${subtotal > 0 ? 'text-emerald-600' : 'text-slate-400'}`;
+            }
+        }
+
+        function calculateResellerTotals(resellerId) {
+            const itemsData = appState.records[resellerId].items || {};
+            let totalBrought = 0;
+            let totalLeftover = 0;
+            let totalSold = 0;
+            let grandTotal = 0;
+
+            appState.products.forEach(product => {
+                const entry = itemsData[product.id];
+                if (entry) {
+                    const b = parseInt(entry.brought, 10) || 0;
+                    const l = parseInt(entry.leftover, 10) || 0;
+                    const s = Math.max(0, b - l);
+                    totalBrought += b;
+                    totalLeftover += l;
+                    totalSold += s;
+                    grandTotal += s * product.price;
+                }
+            });
+
+            return { totalBrought, totalLeftover, totalSold, grandTotal };
+        }
+
+        function updateSummaries() {
+            const activeTotals = calculateResellerTotals(appState.activeTab);
+            document.getElementById('totalBroughtCount').textContent = activeTotals.totalBrought;
+            document.getElementById('totalLeftoverCount').textContent = activeTotals.totalLeftover;
+            document.getElementById('totalSoldCount').textContent = activeTotals.totalSold;
+            document.getElementById('grandTotalRevenue').textContent = formatRupiah(activeTotals.grandTotal);
+
+            ['malilis', 'mince'].forEach(id => {
+                const totals = calculateResellerTotals(id);
+                const badge = document.getElementById(`badge-${id}`);
+                if (totals.grandTotal > 0) {
+                    badge.textContent = formatRupiah(totals.grandTotal);
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        // =========================================================================
+        // 5. KELOLA PRODUK (TAMBAH / UBAH HARGA / HAPUS)
+        // =========================================================================
+        function openProductModal() {
+            renderManageProductList();
+            const modal = document.getElementById('productModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            renderApp();
+        }
+
+        function renderManageProductList() {
+            const listEl = document.getElementById('manageProductList');
+            if (appState.products.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-sm text-slate-400 py-6">Daftar produk kosong. Tambahkan produk di atas.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = appState.products.map(prod => `
+                <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <div class="flex-1 min-w-0">
+                        <input type="text" value="${escapeHtml(prod.name)}"
+                            onchange="updateProductField('${prod.id}', 'name', this.value)"
+                            class="w-full font-semibold text-sm text-slate-900 bg-transparent border-b border-transparent focus:border-brand-500 focus:outline-none truncate">
+                        <div class="flex items-center gap-1 mt-1">
+                            <span class="text-xs text-slate-400">Rp</span>
+                            <input type="number" min="100" step="50" value="${prod.price}"
+                                onchange="updateProductField('${prod.id}', 'price', this.value)"
+                                class="w-24 text-xs font-semibold text-brand-700 bg-white border border-slate-200 rounded-md px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        </div>
+                    </div>
+                    <button type="button" onclick="deleteProduct('${prod.id}')" title="Hapus produk" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function handleAddProduct(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('newProductName');
+            const priceInput = document.getElementById('newProductPrice');
+
+            const name = nameInput.value.trim();
+            const price = parseInt(priceInput.value, 10);
+
+            if (!name || isNaN(price) || price <= 0) return;
+
+            appState.products.push({
+                id: 'prod_' + Date.now(),
+                name: name,
+                price: price
+            });
+            saveState();
+
+            nameInput.value = '';
+            priceInput.value = '';
+            renderManageProductList();
+            showToast(`Produk "${name}" ditambahkan!`);
+        }
+
+        function updateProductField(productId, field, value) {
+            const product = appState.products.find(p => p.id === productId);
+            if (!product) return;
+
+            if (field === 'name') {
+                const trimmed = value.trim();
+                if (trimmed) product.name = trimmed;
+            } else if (field === 'price') {
+                const parsed = parseInt(value, 10);
+                if (!isNaN(parsed) && parsed > 0) product.price = parsed;
+            }
+            saveState();
+            showToast('Perubahan produk disimpan');
+        }
+
+        function deleteProduct(productId) {
+            const product = appState.products.find(p => p.id === productId);
+            if (!product) return;
+
+            openConfirmDialog(
+                'Hapus Produk?',
+                `Produk "${product.name}" akan dihapus dari daftar Ma lilis dan Mince.`,
+                () => {
+                    appState.products = appState.products.filter(p => p.id !== productId);
+                    saveState();
+                    renderManageProductList();
+                    showToast(`Produk "${product.name}" dihapus.`);
+                }
+            );
+        }
+
+        function confirmRestoreDefaults() {
+            openConfirmDialog(
+                'Reset ke 8 Produk Awal?',
+                'Daftar produk akan dikembalikan ke 8 kue awal (Brownis, Donat, Nagasari, Bolu Kukus, Lapis, Nona Manis, Risol, Peyek).',
+                () => {
+                    appState.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+                    saveState();
+                    renderManageProductList();
+                    showToast('8 produk awal dipulihkan.');
+                }
+            );
+        }
+
+        // =========================================================================
+        // 6. SALIN LAPORAN WHATSAPP & RESET HARI BARU
+        // =========================================================================
+        function generateReceiptText() {
+            const activeId = appState.activeTab;
+            const reseller = RESELLERS[activeId];
+            const itemsData = appState.records[activeId].items || {};
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            let lines = [];
+            lines.push(`*LAPORAN TITIPAN KUE*`);
+            lines.push(`Penjual : *${reseller.name}*`);
+            lines.push(`Tanggal : ${dateStr}`);
+            lines.push(`--------------------------------`);
+
+            let hasActiveItems = false;
+
+            appState.products.forEach(product => {
+                const entry = itemsData[product.id];
+                if (entry) {
+                    const brought = parseInt(entry.brought, 10) || 0;
+                    const leftover = parseInt(entry.leftover, 10) || 0;
+                    if (brought > 0 || leftover > 0) {
+                        hasActiveItems = true;
+                        const sold = Math.max(0, brought - leftover);
+                        const subtotal = sold * product.price;
+                        lines.push(`*${product.name}* (${formatRupiah(product.price)})`);
+                        lines.push(`  Bawa: ${brought} | Sisa: ${leftover} | Laku: *${sold}*`);
+                        lines.push(`  Subtotal: ${formatRupiah(subtotal)}`);
+                    }
+                }
+            });
+
+            if (!hasActiveItems) {
+                lines.push(`(Belum ada stok yang diinput)`);
+            }
+
+            const totals = calculateResellerTotals(activeId);
+            lines.push(`--------------------------------`);
+            lines.push(`Total Bawa   : ${totals.totalBrought} pcs`);
+            lines.push(`Total Sisa   : ${totals.totalLeftover} pcs`);
+            lines.push(`Total Terjual: *${totals.totalSold} pcs*`);
+            lines.push(`*TOTAL SETORAN: ${formatRupiah(totals.grandTotal)}*`);
+
+            return lines.join('\n');
+        }
+
+        function copySummaryToClipboard() {
+            const text = generateReceiptText();
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            tempTextArea.style.position = 'fixed';
+            tempTextArea.style.left = '-9999px';
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast(`Laporan ${RESELLERS[appState.activeTab].name} disalin ke clipboard!`);
+            } catch (err) {
+                showToast('Gagal menyalin laporan.');
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        }
+
+        function confirmResetQuantities() {
+            const resellerId = appState.activeTab;
+            const resellerName = RESELLERS[resellerId].name;
+            const itemsData = appState.records[resellerId].items || {};
+
+            // Kumpulkan item yang memiliki input aktif hari ini
+            const snapshotItems = [];
+            let totalBrought = 0;
+            let totalLeftover = 0;
+            let totalSold = 0;
+            let grandTotal = 0;
+
+            appState.products.forEach(product => {
+                const entry = itemsData[product.id];
+                if (entry) {
+                    const brought = parseInt(entry.brought, 10) || 0;
+                    const leftover = parseInt(entry.leftover, 10) || 0;
+                    if (brought > 0 || leftover > 0) {
+                        const sold = Math.max(0, brought - leftover);
+                        const subtotal = sold * product.price;
+                        snapshotItems.push({
+                            name: product.name,
+                            price: product.price,
+                            brought,
+                            leftover,
+                            sold,
+                            subtotal
+                        });
+                        totalBrought += brought;
+                        totalLeftover += leftover;
+                        totalSold += sold;
+                        grandTotal += subtotal;
+                    }
+                }
+            });
+
+            const hasData = snapshotItems.length > 0;
+            const dialogDesc = hasData
+                ? `Laporan ${resellerName} (${totalSold} pcs terjual • ${formatRupiah(grandTotal)}) akan otomatis disimpan ke Buku Besar, lalu angka direset ke 0.`
+                : `Semua angka Dibawa & Sisa untuk ${resellerName} akan dikosongkan menjadi 0.`;
+
+            openConfirmDialog(
+                `Reset Hari Baru (${resellerName})?`,
+                dialogDesc,
+                () => {
+                    if (hasData) {
+                        const now = new Date();
+                        const yyyy = now.getFullYear();
+                        const mm = String(now.getMonth() + 1).padStart(2, '0');
+                        const dd = String(now.getDate()).padStart(2, '0');
+                        const hh = String(now.getHours()).padStart(2, '0');
+                        const min = String(now.getMinutes()).padStart(2, '0');
+
+                        appState.ledger.unshift({
+                            id: 'ldg_' + Date.now(),
+                            dateKey: `${yyyy}-${mm}-${dd}`,
+                            timeStr: `${hh}:${min}`,
+                            resellerId: resellerId,
+                            resellerName: resellerName,
+                            totalBrought,
+                            totalLeftover,
+                            totalSold,
+                            grandTotal,
+                            items: snapshotItems
+                        });
+                    }
+
+                    appState.records[resellerId] = { items: {} };
+                    saveState();
+                    renderApp();
+                    showToast(hasData
+                        ? `Tersimpan ke Buku Besar & ${resellerName} direset!`
+                        : `Data ${resellerName} berhasil direset.`);
+                }
+            );
+        }
+
+        // =========================================================================
+        // 6B. HALAMAN BUKU BESAR AKUNTANSI & KALENDER
+        // =========================================================================
+        function toggleView(viewName) {
+            uiState.currentView = viewName;
+            const trackerView = document.getElementById('mainTrackerView');
+            const ledgerView = document.getElementById('ledgerView');
+            const btnOpenLedger = document.getElementById('btnOpenLedger');
+
+            if (viewName === 'ledger') {
+                trackerView.classList.add('hidden');
+                ledgerView.classList.remove('hidden');
+                btnOpenLedger.className = 'inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500 text-white font-semibold text-sm shadow-xs transition-colors touch-manipulation';
+                renderLedgerView();
+            } else {
+                ledgerView.classList.add('hidden');
+                trackerView.classList.remove('hidden');
+                btnOpenLedger.className = 'inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-800 border border-amber-200/80 font-semibold text-sm transition-colors touch-manipulation';
+                renderApp();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        function setLedgerFilter(filter) {
+            uiState.ledgerFilter = filter;
+            ['all', 'malilis', 'mince'].forEach(key => {
+                const btn = document.getElementById(`filter-${key}`);
+                if (key === filter) {
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800';
+                }
+            });
+            renderLedgerView();
+        }
+
+        function changeLedgerMonth(delta) {
+            let m = uiState.calendarMonth + delta;
+            let y = uiState.calendarYear;
+            if (m < 0) {
+                m = 11;
+                y -= 1;
+            } else if (m > 11) {
+                m = 0;
+                y += 1;
+            }
+            uiState.calendarMonth = m;
+            uiState.calendarYear = y;
+            uiState.selectedDate = null;
+            renderLedgerView();
+        }
+
+        function selectLedgerDate(dateKey) {
+            uiState.selectedDate = (uiState.selectedDate === dateKey) ? null : dateKey;
+            renderLedgerView();
+        }
+
+        function formatIndoDate(dateKey) {
+            if (!dateKey) return '';
+            const [y, m, d] = dateKey.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d);
+            return dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function renderLedgerView() {
+            const year = uiState.calendarYear;
+            const month = uiState.calendarMonth;
+            const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+            const monthDate = new Date(year, month, 1);
+            document.getElementById('calendarMonthLabel').textContent = monthDate.toLocaleDateString('id-ID', {
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Filter data sesuai penjual dan bulan aktif
+            const filteredByReseller = appState.ledger.filter(entry =>
+                uiState.ledgerFilter === 'all' || entry.resellerId === uiState.ledgerFilter
+            );
+
+            const monthEntries = filteredByReseller.filter(entry =>
+                entry.dateKey && entry.dateKey.startsWith(monthPrefix)
+            );
+
+            // Hitung ringkasan bulan ini
+            let sumSold = 0;
+            let sumRev = 0;
+            const revenueByDate = {};
+
+            monthEntries.forEach(e => {
+                sumSold += Number(e.totalSold) || 0;
+                sumRev += Number(e.grandTotal) || 0;
+                revenueByDate[e.dateKey] = (revenueByDate[e.dateKey] || 0) + (Number(e.grandTotal) || 0);
+            });
+
+            document.getElementById('ledgerMonthSold').textContent = sumSold.toLocaleString('id-ID');
+            document.getElementById('ledgerMonthEntries').textContent = monthEntries.length;
+            document.getElementById('ledgerMonthRevenue').textContent = formatRupiah(sumRev);
+
+            // Render Kalender
+            const firstDayOfWeek = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            let calHtml = '';
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                calHtml += `<div class="h-11"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+                const hasData = revenueByDate[dateKey] !== undefined;
+                const isSelected = uiState.selectedDate === dateKey;
+                const isToday = todayKey === dateKey;
+
+                let btnClass = 'h-11 rounded-xl flex flex-col items-center justify-center text-xs font-semibold transition-all relative border ';
+                if (isSelected) {
+                    btnClass += 'bg-brand-600 text-white border-brand-600 shadow-xs';
+                } else if (hasData) {
+                    btnClass += 'bg-emerald-50/90 text-emerald-900 border-emerald-200 hover:bg-emerald-100';
+                } else if (isToday) {
+                    btnClass += 'bg-slate-100 text-slate-900 border-slate-300';
+                } else {
+                    btnClass += 'bg-white text-slate-600 border-transparent hover:bg-slate-50';
+                }
+
+                calHtml += `
+                    <button type="button" onclick="selectLedgerDate('${dateKey}')" class="${btnClass}">
+                        <span>${day}</span>
+                        ${hasData ? `<span class="w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-white' : 'bg-emerald-500'}"></span>` : ''}
+                    </button>
+                `;
+            }
+            document.getElementById('calendarDaysGrid').innerHTML = calHtml;
+
+            const btnClearDate = document.getElementById('btnClearDateFilter');
+            if (uiState.selectedDate) {
+                btnClearDate.classList.remove('hidden');
+                document.getElementById('journalHeading').textContent = `Jurnal: ${formatIndoDate(uiState.selectedDate)}`;
+            } else {
+                btnClearDate.classList.add('hidden');
+                document.getElementById('journalHeading').textContent = `Jurnal Bulan ${monthDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`;
+            }
+
+            // Render Daftar Jurnal
+            const displayedEntries = uiState.selectedDate
+                ? monthEntries.filter(e => e.dateKey === uiState.selectedDate)
+                : monthEntries;
+
+            const container = document.getElementById('ledgerEntriesContainer');
+            if (displayedEntries.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center space-y-2">
+                        <div class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                            <i data-lucide="book-x" class="w-5 h-5"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-700">Belum ada catatan di Buku Besar</p>
+                        <p class="text-xs text-slate-400 max-w-xs mx-auto">Data akan masuk otomatis ke sini setiap kali Anda menekan tombol <strong>Reset Hari Baru</strong> pada halaman utama.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = displayedEntries.map(entry => {
+                const isMalilis = entry.resellerId === 'malilis';
+                return `
+                    <div onclick="openLedgerDetailModal('${entry.id}')" class="p-4 sm:px-5 hover:bg-slate-50 active:bg-slate-100 cursor-pointer transition-colors flex items-center justify-between gap-3">
+                        <div class="min-w-0 space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-bold px-2 py-0.5 rounded-md ${isMalilis ? 'bg-brand-100 text-brand-800' : 'bg-sky-100 text-sky-800'}">
+                                    ${escapeHtml(entry.resellerName)}
+                                </span>
+                                <span class="text-xs font-medium text-slate-500">
+                                    ${formatIndoDate(entry.dateKey)} • ${entry.timeStr || ''}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500">
+                                Bawa: <strong class="text-slate-700">${entry.totalBrought}</strong> • Sisa: <strong class="text-amber-700">${entry.totalLeftover}</strong> • Laku: <strong class="text-emerald-700">${entry.totalSold} pcs</strong>
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0 flex items-center gap-2">
+                            <div>
+                                <span class="font-display font-extrabold text-sm sm:text-base text-emerald-600 block">${formatRupiah(entry.grandTotal)}</span>
+                                <span class="text-[10px] text-slate-400">Lihat rincian</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function openLedgerDetailModal(entryId) {
+            const entry = appState.ledger.find(e => e.id === entryId);
+            if (!entry) return;
+
+            const isMalilis = entry.resellerId === 'malilis';
+            const badge = document.getElementById('detailModalBadge');
+            badge.textContent = entry.resellerName;
+            badge.className = `text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${isMalilis ? 'bg-brand-100 text-brand-800' : 'bg-sky-100 text-sky-800'}`;
+
+            document.getElementById('detailModalDate').textContent = `${formatIndoDate(entry.dateKey)} (${entry.timeStr || ''})`;
+
+            const itemsHtml = (entry.items || []).map(item => `
+                <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                    <div>
+                        <p class="font-semibold text-slate-900">${escapeHtml(item.name)}</p>
+                        <p class="text-xs text-slate-500">Bawa ${item.brought} | Sisa ${item.leftover} | Laku <strong>${item.sold} pcs</strong> × ${formatRupiah(item.price)}</p>
+                    </div>
+                    <span class="font-display font-bold text-slate-800">${formatRupiah(item.subtotal)}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('detailModalBody').innerHTML = `
+                <div class="divide-y divide-slate-100">${itemsHtml}</div>
+                <div class="mt-4 p-3.5 rounded-xl bg-slate-900 text-white flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Total Terjual: ${entry.totalSold} pcs</span>
+                        <span class="text-xs font-bold text-brand-400">TOTAL SETORAN</span>
+                    </div>
+                    <span class="font-display font-extrabold text-lg text-emerald-400">${formatRupiah(entry.grandTotal)}</span>
+                </div>
+            `;
+
+            document.getElementById('btnDeleteLedgerEntry').onclick = () => {
+                closeLedgerDetailModal();
+                openConfirmDialog(
+                    'Hapus Catatan Buku Besar?',
+                    `Catatan setoran ${entry.resellerName} tanggal ${formatIndoDate(entry.dateKey)} akan dihapus permanen.`,
+                    () => {
+                        appState.ledger = appState.ledger.filter(e => e.id !== entry.id);
+                        saveState();
+                        renderApp();
+                        showToast('Catatan Buku Besar dihapus.');
+                    }
+                );
+            };
+
+            const modal = document.getElementById('ledgerDetailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeLedgerDetailModal() {
+            const modal = document.getElementById('ledgerDetailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // =========================================================================
+        // 7. DIALOG KONFIRMASI & TOAST NOTIFIKASI
+        // =========================================================================
+        let pendingConfirmCallback = null;
+
+        function openConfirmDialog(title, message, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            pendingConfirmCallback = onConfirm;
+
+            const dialog = document.getElementById('confirmDialog');
+            dialog.classList.remove('hidden');
+            dialog.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeConfirmDialog() {
+            const dialog = document.getElementById('confirmDialog');
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
+            pendingConfirmCallback = null;
+        }
+
+        document.getElementById('confirmActionBtn').addEventListener('click', () => {
+            if (typeof pendingConfirmCallback === 'function') {
+                pendingConfirmCallback();
+            }
+            closeConfirmDialog();
+        });
+
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2500);
+        }
+
+        // =========================================================================
+        // 8. INISIALISASI & PENYIMPANAN SAAT HALAMAN DITUTUP
+        // =========================================================================
+        window.addEventListener('beforeunload', () => {
+            saveState();
+        });
+
+        window.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                saveState();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderApp();
+        });
+    </script>
+</body>
+</html>
