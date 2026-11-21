@@ -2,7 +2,7 @@
   "name": "Penjualan",
   "short_name": "Penjualan",
   "description": "Pencatatan stok dibawa, sisa, terjual, dan buku besar setoran reseller.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=2",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
