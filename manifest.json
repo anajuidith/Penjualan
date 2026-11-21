@@ -1,6 +1,6 @@
 {
-  "name": "Catatan Titipan - Rekap Stok & Setoran",
-  "short_name": "Catatan Titipan",
+  "name": "Penjualan",
+  "short_name": "Penjualan",
   "description": "Pencatatan stok dibawa, sisa, terjual, dan buku besar setoran reseller.",
   "start_url": "./index.html",
   "scope": "./",
